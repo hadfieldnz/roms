@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -124,8 +124,8 @@
 !
 !  Read in observation time (days).
 !
-        CALL netcdf_get_fvar (ng, model, OBS(ng)%name, Vname(1,idObsT), &
-     &                        Tobs(Mstr:),                              &
+        CALL netcdf_get_time (ng, model, OBS(ng)%name, Vname(1,idObsT), &
+     &                        Rclock%DateNumber, Tobs(Mstr:),           &
      &                        ncid = OBS(ng)%ncid,                      &
      &                        start = (/NstrObs(ng)/),                  &
      &                        total = (/Nobs(ng)/))

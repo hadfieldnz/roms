@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -537,7 +537,7 @@
         END DO
 #  endif
 
-#  if defined LMD_MIXING || defined MY25_MIXING || defined GLS_MIXING
+#  if defined LMD_MIXING || defined TKE_MIXING
         IF (Aout(idVvis,ng)) THEN
           DO k=0,N(ng)
             DO j=JstrR,JendR
@@ -1744,8 +1744,8 @@
 !  Initialize vorticity fields.
 !
         IF (Aout(id2dPV,ng)) THEN
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr,JendR
+            DO i=Istr,IendR
               AVERAGE(ng)%avgpvor2d(i,j)=potvor_bar(i,j)
 # ifdef WET_DRY
               AVERAGE(ng)%avgpvor2d(i,j)=AVERAGE(ng)%avgpvor2d(i,j)*    &
@@ -1755,8 +1755,8 @@
           END DO
         END IF
         IF (Aout(id2dRV,ng)) THEN
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr,JendR
+            DO i=Istr,IendR
               AVERAGE(ng)%avgrvor2d(i,j)=relvor_bar(i,j)
 # ifdef WET_DRY
               AVERAGE(ng)%avgrvor2d(i,j)=AVERAGE(ng)%avgrvor2d(i,j)*    &
@@ -1768,8 +1768,8 @@
 # ifdef SOLVE3D
         IF (Aout(id3dPV,ng)) THEN
           DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
+            DO j=Jstr,JendR
+              DO i=Istr,IendR
                 AVERAGE(ng)%avgpvor3d(i,j,k)=potvor(i,j,k)
 #  ifdef WET_DRY
                 AVERAGE(ng)%avgpvor3d(i,j,k)=AVERAGE(ng)%avgpvor3d(i,j, &
@@ -1782,8 +1782,8 @@
         END IF
         IF (Aout(id3dRV,ng)) THEN
           DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
+            DO j=Jstr,JendR
+              DO i=Istr,IendR
                 AVERAGE(ng)%avgrvor3d(i,j,k)=relvor(i,j,k)
 #  ifdef WET_DRY
                 AVERAGE(ng)%avgrvor3d(i,j,k)=AVERAGE(ng)%avgrvor3d(i,j, &
@@ -2304,7 +2304,7 @@
         END DO
 #  endif
 
-#  if defined LMD_MIXING || defined MY25_MIXING || defined GLS_MIXING
+#  if defined LMD_MIXING || defined TKE_MIXING
         IF (Aout(idVvis,ng)) THEN
           DO k=0,N(ng)
             DO j=JstrR,JendR
@@ -3514,8 +3514,8 @@
 !  Accumulate vorticity fields.
 !
         IF (Aout(id2dPV,ng)) THEN
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr,JendR
+            DO i=Istr,IendR
               AVERAGE(ng)%avgpvor2d(i,j)=AVERAGE(ng)%avgpvor2d(i,j)+    &
 # ifdef WET_DRY
      &                                   GRID(ng)%pmask_full(i,j)*      &
@@ -3525,8 +3525,8 @@
           END DO
         END IF
         IF (Aout(id2dRV,ng)) THEN
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr,JendR
+            DO i=Istr,IendR
               AVERAGE(ng)%avgrvor2d(i,j)=AVERAGE(ng)%avgrvor2d(i,j)+    &
 # ifdef WET_DRY
      &                                   GRID(ng)%pmask_full(i,j)*      &
@@ -3538,8 +3538,8 @@
 # ifdef SOLVE3D
         IF (Aout(id3dPV,ng)) THEN
           DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
+            DO j=Jstr,JendR
+              DO i=Istr,IendR
                 AVERAGE(ng)%avgpvor3d(i,j,k)=AVERAGE(ng)%avgpvor3d(i,j, &
      &                                                             k)+  &
 #  ifdef WET_DRY
@@ -3552,8 +3552,8 @@
         END IF
         IF (Aout(id3dRV,ng)) THEN
           DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
+            DO j=Jstr,JendR
+              DO i=Istr,IendR
                 AVERAGE(ng)%avgrvor3d(i,j,k)=AVERAGE(ng)%avgrvor3d(i,j, &
      &                                                             k)+  &
 #  ifdef WET_DRY
@@ -4259,7 +4259,7 @@
         END IF
 #  endif
 
-#  if defined LMD_MIXING || defined MY25_MIXING || defined GLS_MIXING
+#  if defined LMD_MIXING || defined TKE_MIXING
         IF (Aout(idVvis,ng)) THEN
           DO k=0,N(ng)
             DO j=JstrR,JendR
@@ -6271,8 +6271,8 @@
 !  Process vorticity fields.
 !
         IF (Aout(id2dPV,ng)) THEN
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr,JendR
+            DO i=Istr,IendR
               AVERAGE(ng)%avgpvor2d(i,j)=pfac(i,j)*                     &
      &                                   AVERAGE(ng)%avgpvor2d(i,j)
             END DO
@@ -6292,8 +6292,8 @@
         END IF
 
         IF (Aout(id2dRV,ng)) THEN
-          DO j=Jstr,Jend
-            DO i=Istr,Iend
+          DO j=Jstr,JendR
+            DO i=Istr,IendR
               AVERAGE(ng)%avgrvor2d(i,j)=pfac(i,j)*                     &
      &                                   AVERAGE(ng)%avgrvor2d(i,j)
             END DO
@@ -6315,8 +6315,8 @@
 # ifdef SOLVE3D
         IF (Aout(id3dPV,ng)) THEN
           DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
+            DO j=Jstr,JendR
+              DO i=Istr,IendR
                 AVERAGE(ng)%avgpvor3d(i,j,k)=pfac(i,j)*                 &
      &                                      AVERAGE(ng)%avgpvor3d(i,j,k)
               END DO
@@ -6338,8 +6338,8 @@
 
         IF (Aout(id3dRV,ng)) THEN
           DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
+            DO j=Jstr,JendR
+              DO i=Istr,IendR
                 AVERAGE(ng)%avgrvor3d(i,j,k)=pfac(i,j)*                 &
      &                                      AVERAGE(ng)%avgrvor3d(i,j,k)
               END DO

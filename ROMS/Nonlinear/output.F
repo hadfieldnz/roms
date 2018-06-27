@@ -5,7 +5,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -441,8 +441,9 @@
 !  Write out data into time-averaged NetCDF file.
 !
       IF (LwrtAVG2(ng)) THEN
-        IF ((iic(ng).gt.ntstart(ng)).and.                               &
-     &      (MOD(iic(ng)-1,nAVG2(ng)).eq.0)) THEN
+        IF (((iic(ng).gt.ntstart(ng)).and.                              &
+     &       (MOD(iic(ng)-1,nAVG2(ng)).eq.0)).or.                       &
+     &      ((iic(ng).ge.ntsAVG2(ng)).and.(nAVG2(ng).eq.1))) THEN
           CALL wrt_avg2 (ng)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                     __FILE__)) RETURN

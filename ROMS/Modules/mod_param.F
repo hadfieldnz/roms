@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -998,7 +998,7 @@
 !
 #ifdef SOLVE3D
       nLBCvar=5+MT
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
       nLBCvar=nLBCvar+1
 # endif
 # ifdef ICE_MODEL
@@ -1025,6 +1025,7 @@
               LBC(ibry,ivar,ng)%nudging = .FALSE.
               LBC(ibry,ivar,ng)%periodic = .FALSE.
               LBC(ibry,ivar,ng)%radiation = .FALSE.
+              LBC(ibry,ivar,ng)%reduced = .FALSE.
               LBC(ibry,ivar,ng)%Shchepetkin = .FALSE.
             END DO
           END DO

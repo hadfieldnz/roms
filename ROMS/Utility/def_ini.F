@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -70,8 +70,9 @@
 !
       SourceFile=__FILE__
 
-# if defined ADJUST_BOUNDARY || \
-     defined ADJUST_STFLUX   || defined ADJUST_WSTRESS
+# if !defined CORRELATION     && \
+     (defined ADJUST_BOUNDARY || defined ADJUST_STFLUX || \
+      defined ADJUST_WSTRESS)
 !
 !=======================================================================
 !  Open existing nonlinear model initial conditions and define new
@@ -539,8 +540,6 @@
 !
       IF (.not.LdefINI(ng)) THEN
         ncname=INI(ng)%name
-
-# if !(defined ADJUST_STFLUX || defined ADJUST_WSTRESS)
 !
 !  Open initialization file for read/write.
 !
@@ -570,7 +569,6 @@
         DO i=1,NV
           got_var(i)=.FALSE.
         END DO
-# endif
 !
 !  Scan variable list from input NetCDF and activate switches for
 !  initialization variables. Get variable IDs.
@@ -596,7 +594,7 @@
             got_var(idVvel)=.TRUE.
             INI(ng)%Vid(idVvel)=var_id(i)
 #  if defined BVF_MIXING || defined LMD_MIXING || \
-      defined GLS_MIXING || defined MY25_MIXING
+      defined TKE_MIXING
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idVvis))) THEN
             got_var(idVvis)=.TRUE.
             INI(ng)%Vid(idVvis)=var_id(i)

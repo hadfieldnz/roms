@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -104,11 +104,13 @@
       END DO
 !
 !  Determine state variables to read from input NetCDF file.  Notice
-!  that these state variable are only assigned if input flag model < 8.
-!  Higher values are used to process only boundary condition or
-!  surface forcing in the variational data assimilation algorithms.
+!  that these state variable are only assigned if input flag model < 12,
+!  model = 14, or model = 15. That is, all the state variables associated
+!  with ROMS prognostic equations.  The remaining values are used to
+!  process open boundary condition or surface forcing variable in the
+!  4D-Var control vector.
 !
-      IF (model.lt.8.or.model.eq.14) THEN
+      IF ((model.le.11).or.(model.eq.14).or.(model.eq.15)) THEN
 #ifdef ANA_INITIAL
         IF (nrrec(ng).ne.0) THEN
           get_var(idFsur)=.TRUE.
@@ -268,7 +270,7 @@
           get_var(idRzet)=.TRUE.
           get_var(idRu2d)=.TRUE.
           get_var(idRv2d)=.TRUE.
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
           get_var(idMtke)=.TRUE.
           get_var(idMtls)=.TRUE.
           get_var(idVmLS)=.TRUE.
@@ -285,8 +287,8 @@
 !  Determine 4DVar boundary variables to adjust.
 !
       IF ((model.eq.iADM).or.(model.eq.iTLM).or.(model.eq.iNLM).or.     &
-     &    (model.eq.iRPM).or.(model.eq.8).or.(model.eq.10).or.          &
-     &    (model.eq.12)) THEN
+     &    (model.eq.iRPM).or.(model.eq.5).or.(model.eq.12).or.          &
+     &    (model.eq.16)) THEN
         IF (ANY(Lobc(:,isFsur,ng))) THEN
           get_var(idSbry(isFsur))=.TRUE.
         END IF
@@ -316,8 +318,8 @@
 !  Determine 4DVar surface forcing variables to adjust.
 !
       IF ((model.eq.iADM).or.(model.eq.iTLM).or.(model.eq.iNLM).or.     &
-     &    (model.eq.iRPM).or.(model.eq.9).or.(model.eq.11).or.          &
-     &    (model.eq.12)) THEN
+     &    (model.eq.iRPM).or.(model.eq.5).or.(model.eq.13).or.          &
+     &    (model.eq.17)) THEN
 # ifdef ADJUST_STFLUX
         DO itrc=1,NT(ng)
           IF (Lstflux(itrc,ng)) THEN
@@ -328,26 +330,6 @@
 # ifdef ADJUST_WSTRESS
         get_var(idUsms)=.TRUE.
         get_var(idVsms)=.TRUE.
-# endif
-      END IF
-#endif
-#ifdef BNORM
-!
-!  Determine variables for Hessian singular vectors with background
-!  normalization.
-!  (HGA: This is not needed because already accounted above when
-!        model < 8).
-!
-      IF (model.eq.6) THEN
-        get_var(idFsur)=.TRUE.
-        get_var(idUbar)=.TRUE.
-        get_var(idVbar)=.TRUE.
-# ifdef SOLVE3D
-        get_var(idUvel)=.TRUE.
-        get_var(idVvel)=.TRUE.
-        DO itrc=1,NAT
-          get_var(idTvar(itrc))=.TRUE.
-        END DO
 # endif
       END IF
 #endif
@@ -406,7 +388,7 @@
           have_var(idVvel)=.TRUE.
         ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idRv3d))) THEN
           have_var(idRv3d)=.TRUE.
-# if defined GLS_MIXING || defined MY25_MIXING || defined LMD_MIXING
+# if defined LMD_MIXING || defined TKE_MIXING
         ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idVvis))) THEN
           have_var(idVvis)=.TRUE.
         ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idTdif))) THEN
@@ -428,7 +410,7 @@
           have_var(idGhat(isalt))=.TRUE.
 #  endif
 # endif
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
         ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idMtke))) THEN
           have_var(idMtke)=.TRUE.
         ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idMtls))) THEN
@@ -786,7 +768,7 @@
         END DO
       END IF
 # endif
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
       IF (.not.have_var(idMtke).and.get_var(idMtke)) THEN
         IF (Master) WRITE (stdout,10) string, TRIM(Vname(1,idMtke)),    &
      &                                TRIM(ncname)

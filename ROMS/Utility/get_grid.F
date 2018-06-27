@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -1440,7 +1440,8 @@
               ELSE
                 IF (Master) THEN
                   WRITE (stdout,30) 'longitude of RHO-points: lon_rho', &
-     &                              ng, TRIM(ncname), Fmin, Fmax
+     &                              ng, TRIM(ncname),                   &
+     &                              LonMin(ng), LonMax(ng)
                 END IF
               END IF
 # ifdef NESTING
@@ -1484,7 +1485,8 @@
               ELSE
                 IF (Master) THEN
                   WRITE (stdout,30) 'latitude of RHO-points lat_rho',   &
-     &                              ng, TRIM(ncname), Fmin, Fmax
+     &                              ng, TRIM(ncname),                   &
+     &                              LatMin(ng), LatMax(ng)
                 END IF
               END IF
 # ifdef NESTING
@@ -2037,7 +2039,7 @@
 !
 !  Open adjoint sensitivity NetCDF file for reading.
 !
-      IF (GotScope(4).and.(ADS(ng)%ncid.eq.-1)) THEN
+      IF (ADS(ng)%ncid.eq.-1) THEN
         CALL netcdf_open (ng, model, ncname, 0, ADS(ng)%ncid)
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) THEN

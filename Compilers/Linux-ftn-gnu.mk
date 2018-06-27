@@ -1,6 +1,6 @@
 # svn $Id$
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-# Copyright (c) 2002-2017 The ROMS/TOMS Group                           :::
+# Copyright (c) 2002-2018 The ROMS/TOMS Group                           :::
 #   Licensed under a MIT/X style license                                :::
 #   See License_ROMS.txt                                                :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -73,7 +73,12 @@ ifdef USE_OpenMP
 endif
 
 ifdef USE_DEBUG
+<<<<<<< HEAD
            FFLAGS += -g -fbounds-check -fbacktrace -finit-real=nan -ffpe-trap=invalid,zero,overflow
+=======
+           FFLAGS += -g -fbounds-check -fbacktrace
+           FFLAGS += -finit-real=nan -ffpe-trap=invalid,zero,overflow
+>>>>>>> 836bcc31d8277fed807338d0bf87376cdffbcef4
 else
            FFLAGS += -O3 -ffast-math
 endif

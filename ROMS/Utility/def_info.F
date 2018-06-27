@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -1564,7 +1564,7 @@
 # endif
 #endif
 
-#if defined SOLVE3D && (defined MY25_MIXING || defined GLS_MIXING)
+#if defined SOLVE3D && defined TKE_MIXING
 # ifdef TKE_DIF2
       Vinfo( 1)='tkenu2'
       Vinfo( 2)='harmonic mixing coefficient for turbulent energy'
@@ -1630,7 +1630,7 @@
       IF (FoundError(exit_flag, NoError, __LINE__,                      &
      &               __FILE__)) RETURN
 
-# if defined MY25_MIXING || defined GLS_MIXING
+# if defined TKE_MIXING
       Vinfo( 1)='Akk_bak'
       Vinfo( 2)=                                                        &
      &   'background vertical mixing coefficient for turbulent energy'

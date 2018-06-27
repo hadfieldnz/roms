@@ -7,7 +7,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -31,6 +31,16 @@
 !    and model with a nonlocal boundary layer parameterization,        !
 !    Reviews of Geophysics, 32,363-403.                                !
 !                                                                      !
+# ifdef LI_FOX_KEMPER
+!                                                                      !
+!  Li, Q. and B. Fox-Kemper, 2017: Assessing the effects of Langmuir   !
+!    turbulence on the entrainment buoyancy flux in the ocean surface  !
+!    boundary layer, JPO, DOI: 10.1175/JPO-D-17-0085.1                 !
+!                                                                      !
+!  Li, Q., B. Fox-Kemper, Ø. Breivik, and  Adrean Webb, 2017:          !
+!    Statistical models of global Langmuir mixing, Ocean Modelling,    !
+!    DOI: 10.1016/j.ocemod.2017.03.016                                 !
+# endif
 !=======================================================================
 !
       implicit none
@@ -67,6 +77,9 @@
 # ifdef MASKING
      &                    GRID(ng) % rmask,                             &
 # endif
+# ifdef WET_DRY
+     &                    GRID(ng) % rmask_wet,                         &
+# endif
      &                    GRID(ng) % f,                                 &
      &                    GRID(ng) % Hz,                                &
      &                    GRID(ng) % z_r,                               &
@@ -90,11 +103,12 @@
 # endif
      &                    MIXING(ng) % Akt,                             &
      &                    MIXING(ng) % Akv,                             &
-#ifdef AKT_3D
+# ifdef AKT_3D
      &                    CLIMA(ng) % tclm,                             &
-#endif
-# ifdef OPTIC_MANIZZA
-     &                    OCEAN(ng) % decayW,                           &
+# endif
+# ifdef LI_FOX_KEMPER
+     &                    FORCES(ng) % Uwind,                           &
+     &                    FORCES(ng) % Vwind,                           &
 # endif
      &                    MIXING(ng) % hsbl,                            &
      &                    MIXING(ng) % ksbl)
@@ -108,6 +122,9 @@
      &                          nstp,                                   &
 # ifdef MASKING
      &                          rmask,                                  &
+# endif
+# ifdef WET_DRY
+     &                          rmask_wet,                              &
 # endif
      &                          f, Hz, z_r, z_w,                        &
      &                          u, v, pden,                             &
@@ -125,8 +142,8 @@
 #ifdef AKT_3D
      &                          tclm,                                   &
 #endif
-# ifdef OPTIC_MANIZZA
-     &                          decayW,                                 &
+# ifdef LI_FOX_KEMPER
+     &                          Uwind, Vwind,                           &
 # endif
      &                          hsbl, ksbl)
 !***********************************************************************
@@ -141,15 +158,6 @@
 # ifdef LMD_SHAPIRO
       USE shapiro_mod
 # endif
-# ifdef OPTIC_MANIZZA
-#  ifdef BIO_COBALT
-      USE mod_biology, ONLY: iochl
-#  elif defined BIO_UMAINE
-      USE mod_biology, ONLY: iS1CH, iS2CH, iS3CH
-#  else
-!??? need to define index for cholorphyll in other bio model
-#  endif
-# endif
 !
 !  Imported variable declarations.
 !
@@ -162,6 +170,9 @@
 #  ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:,LBj:)
 #  endif
+# ifdef WET_DRY
+      real(r8), intent(in) :: rmask_wet(LBi:,LBj:)
+# endif
       real(r8), intent(in) :: f(LBi:,LBj:)
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
@@ -182,11 +193,12 @@
       real(r8), intent(in) :: bvf(LBi:,LBj:,0:)
       real(r8), intent(inout) :: Akt(LBi:,LBj:,0:,:)
       real(r8), intent(inout) :: Akv(LBi:,LBj:,0:)
-#ifdef AKT_3D
+#  ifdef AKT_3D
       real(r8), intent(in) :: tclm(LBi:,LBj:,:,:)
-# endif
-#  ifdef OPTIC_MANIZZA
-      real(r8), intent(in)    :: decayW(LBi:,LBj:,0:,:)
+#  endif
+#  ifdef LI_FOX_KEMPER
+      real(r8), intent(in) :: Uwind(LBi:,LBj:)
+      real(r8), intent(in) :: Vwind(LBi:,LBj:)
 #  endif
       real(r8), intent(inout) :: hsbl(LBi:,LBj:)
       integer,  intent(out) :: ksbl(LBi:,LBj:)
@@ -197,6 +209,9 @@
 #  ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
 #  endif
+# ifdef WET_DRY
+      real(r8), intent(in) :: rmask_wet(LBi:UBi,LBj:UBj)
+# endif
       real(r8), intent(in) :: f(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
@@ -220,8 +235,9 @@
 #ifdef AKT_3D
       real(r8), intent(in) :: tclm(LBi:UBi,LBj:UBj,N(ng),NT(ng)+2)
 # endif
-#  ifdef OPTIC_MANIZZA
-      real(r8), intent(in)    :: decayW(LBi:UBi,LBj:UBj,0:N(ng),4)
+#  ifdef LI_FOX_KEMPER
+      real(r8), intent(in) :: Uwind(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: Vwind(LBi:UBi,LBj:UBj)
 #  endif
       real(r8), intent(inout) :: hsbl(LBi:UBi,LBj:UBj)
       integer,  intent(out) :: ksbl(LBi:UBi,LBj:UBj)
@@ -275,6 +291,27 @@
       real(r8), dimension (IminS:ImaxS,JminS:JmaxS) :: wm
       real(r8), dimension (IminS:ImaxS,JminS:JmaxS) :: ws
       real(r8), dimension (IminS:ImaxS,JminS:JmaxS) :: zgrid
+# ifdef LI_FOX_KEMPER
+      real(r8), dimension (IminS:ImaxS,JminS:JmaxS) :: enhance_M
+      real(r8), dimension (IminS:ImaxS) :: LA
+      real(r8), dimension (IminS:ImaxS) :: Wstar
+! Local variables
+     ! parameters
+     real(r8), parameter :: &
+       ! ratio of U19.5 to U10 (Holthuijsen, 2007)
+       u19p5_to_u10 = 1.075, &
+       ! ratio of mean frequency to peak frequency for
+       ! Pierson-Moskowitz spectrum (Webb, 2011)
+       fm_to_fp = 1.296, &
+       ! ratio of surface Stokes drift to U10
+       us_to_u10 = 0.0162, &
+       ! loss ratio of Stokes transport
+       r_loss = 0.667
+     real(r8) :: us, hm0, fm, fp, vstokes, kphil, kstar
+     real(r8) :: z0, z0i, rr1, rr2, rr3, rr4, tmp, us_sl, lasl_sqr_i
+     real(r8) :: u10
+     real(r8) :: LaDepthRatio=0.04  ! The ratio of OBL depth to average Stokes drift over
+# endif
 
 # include "set_bounds.h"
 !
@@ -282,8 +319,12 @@
 !  Initialize relevant parameters.
 !-----------------------------------------------------------------------
 !
+# ifdef LI_FOX_KEMPER
+      Vtc=lmd_Cv/lmd_Ric
+# else
       Vtc=lmd_Cv*SQRT(-lmd_betaT)/(SQRT(lmd_cs*lmd_epsilon)*            &
      &                             lmd_Ric*vonKar*vonKar)
+# endif
 !
 !-----------------------------------------------------------------------
 !  Get approximation of surface layer depth using "lmd_eps" and
@@ -479,6 +520,69 @@
      &            Hz(i,j,N(ng))*(cff1*dV(i,N(ng))+cff2*dV(i,N(ng)-1))
         END DO
 !
+# ifdef LI_FOX_KEMPER
+!  Estimate Langmuir number from winds
+!
+        DO i=Istr,Iend
+          IF (rmask(i,j) > 0.0) THEN
+            u10 = sqrt(Uwind(i,j)**2 + Vwind(i,j)**2)
+            ! surface Stokes drift
+            us = us_to_u10*u10
+            !
+            ! significant wave height from Pierson-Moskowitz
+            ! spectrum (Bouws, 1998)
+            hm0 = 0.0246 *u10**2
+            !
+            ! peak frequency (PM, Bouws, 1998)
+            tmp = 2.0 * PI * u19p5_to_u10 * u10
+            fp = 0.877 * g / tmp
+            !
+            ! mean frequency
+            fm = fm_to_fp * fp
+            !
+            ! total Stokes transport (a factor r_loss is applied to account
+            !  for the effect of directional spreading, multidirectional waves
+            !  and the use of PM peak frequency and PM significant wave height
+            !  on estimating the Stokes transport)
+            vstokes = 0.125 * PI * r_loss * fm * hm0**2
+            !
+            ! the general peak wavenumber for Phillips' spectrum
+            ! (Breivik et al., 2016) with correction of directional spreading
+            kphil = 0.176 * us / vstokes
+            !
+            ! surface layer averaged Stokes dirft with Stokes drift profile
+            ! estimated from Phillips' spectrum (Breivik et al., 2016)
+            ! the directional spreading effect from Webb and Fox-Kemper, 2015
+            ! is also included
+            kstar = kphil * 2.56
+            ! surface layer
+            !z0 = 0.2 * abs(hbl)
+            !BGR hbl now adjusted by averaging ratio before function call.
+            z0 = abs(LaDepthRatio * (z_w(i,j,N(ng))-hsbl(i,j)))
+            z0i = 1.0 / max(z0, 1.e-10_r8)
+            ! term 1 to 4
+            rr1 = ( 0.151 / kphil * z0i -0.84 ) &
+                 * ( 1.0 - exp(-2.0 * kphil * z0) )
+            rr2 = -( 0.84 + 0.0591 / kphil * z0i ) &
+                 *sqrt( 2.0 * PI * kphil * z0 ) &
+                 *erfc( sqrt( 2.0 * kphil * z0 ) )
+            rr3 = ( 0.0632 / kstar * z0i + 0.125 ) &
+                 * (1.0 - exp(-2.0 * kstar * z0) )
+            rr4 = ( 0.125 + 0.0946 / kstar * z0i ) &
+                 *sqrt( 2.0 * PI *kstar * z0) &
+                 *erfc( sqrt( 2.0 * kstar * z0 ) )
+            us_sl = us * (0.715 + rr1 + rr2 + rr3 + rr4)
+            !
+            LA(i) = max(sqrt(Ustar(i,j) / us_sl), 1.e-10_r8)
+          ELSE
+            LA(i) = 1.0e8_r8
+          ENDIF
+          ! Original w'/ust scaling w/ Van Roekel's scaling
+          enhance_M(i,j) = (1+(1.4*LA(i))**(-2)+(5.4*LA(i))**(-4))**(1.5)
+          Wstar(i) = abs(Bo(i,j)*(z_w(i,j,N(ng))-hsbl(i,j)))**1/3
+        END DO
+# endif
+!
 !  Compute turbulent velocity scales for momentum (wm) and tracers (ws).
 !  Then, compute critical function (FC) for bulk Richardson number.
 !
@@ -498,12 +602,22 @@
               wm(i,j)=vonKar*Ustar(i,j)/(1.0_r8+5.0_r8*zetapar)
               ws(i,j)=wm(i,j)
             ELSE                                              ! unstable
+# ifdef LI_FOX_KEMPER
+              IF (zetapar.gt.lmd_zetam) THEN
+                wm(i,j)=vonKar*Ustar(i,j)*                              &
+     &               (1.0_r8-16.0_r8*zetapar)**0.25_r8 * enhance_M(i,j)
+              ELSE
+                wm(i,j)=vonKar*(lmd_am*Ustar3-lmd_cm*zetahat)**r3 *     &
+     &               enhance_M(i,j)
+              END IF
+# else
               IF (zetapar.gt.lmd_zetam) THEN
                 wm(i,j)=vonKar*Ustar(i,j)*                              &
      &                  (1.0_r8-16.0_r8*zetapar)**0.25_r8
               ELSE
                 wm(i,j)=vonKar*(lmd_am*Ustar3-lmd_cm*zetahat)**r3
               END IF
+# endif
               IF (zetapar.gt.lmd_zetas) THEN
                 ws(i,j)=vonKar*Ustar(i,j)*                              &
      &                  (1.0_r8-16.0_r8*zetapar)**0.5_r8
@@ -521,7 +635,14 @@
 !
             Ritop=-gorho0*(Rref(i)-Rk)*depth
             Ribot=(Uref(i)-Uk)**2+(Vref(i)-Vk)**2+                      &
+# ifdef LI_FOX_KEMPER
+     &            Vtc*depth*ws(i,j)*SQRT(ABS(bvf(i,j,k-1))) *           &
+     &            sqrt((0.15_r8*Wstar(i)**3 + 0.17_r8*Ustar(i,j)**3 *   &
+     &            (1.0_r8 + 0.49_r8*LA(i)**(-2))) /                     &
+     &            max(ws(i,j),1e-10)**3)
+# else
      &            Vtc*depth*ws(i,j)*SQRT(ABS(bvf(i,j,k-1)))
+# endif
 # ifdef SASHA
             FC(i,k-1)=Ritop-lmd_Ric*Ribot
 # else
@@ -852,12 +973,22 @@
             wm(i,j)=vonKar*Ustar(i,j)/(1.0_r8+5.0_r8*zetapar)
             ws(i,j)=wm(i,j)
           ELSE                                                ! unstable
+# ifdef LI_FOX_KEMPER
+            IF (zetapar.gt.lmd_zetam) THEN
+              wm(i,j)=vonKar*Ustar(i,j)*                                &
+     &                (1.0_r8-16.0_r8*zetapar)**0.25_r8 * enhance_M(i,j)
+            ELSE
+              wm(i,j)=vonKar*(lmd_am*Ustar3-lmd_cm*zetahat)**r3 *       &
+     &                enhance_M(i,j)
+            END IF
+# else
             IF (zetapar.gt.lmd_zetam) THEN
               wm(i,j)=vonKar*Ustar(i,j)*                                &
      &                (1.0_r8-16.0_r8*zetapar)**0.25_r8
             ELSE
               wm(i,j)=vonKar*(lmd_am*Ustar3-lmd_cm*zetahat)**r3
             END IF
+# endif
             IF (zetapar.gt.lmd_zetas) THEN
               ws(i,j)=vonKar*Ustar(i,j)*                                &
      &                (1.0_r8-16.0_r8*zetapar)**0.5_r8

@@ -7,7 +7,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -1693,7 +1693,7 @@
           END IF
         END DO
 
-#  if defined LMD_MIXING || defined MY25_MIXING || defined GLS_MIXING
+#  if defined LMD_MIXING || defined TKE_MIXING
 !
 !  Define vertical viscosity coefficient.
 !
@@ -3149,13 +3149,6 @@
      &                   NF_FOUT, nvd3, v2dgrd, Aval, Vinfo, ncname)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
-=======
-          Aval(5)=REAL(v2dvar,r8)
-          status=def_var(ng, model, AVG(ng)%ncid, AVG(ng)%Vid(idV2rs),  &
-     &                   NF_FOUT, nvd3, v2dgrd, Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, __LINE__,                  &
-     &                   __FILE__)) RETURN
->>>>>>> 2af9d9e... src:ticket:737
         END IF
 !
 !  Define 2D u-stokes velocity.
@@ -3581,7 +3574,7 @@
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idVVav))) THEN
             got_var(idVVav)=.TRUE.
             AVG(ng)%Vid(idVVav)=var_id(i)
-#  if defined LMD_MIXING || defined MY25_MIXING || defined GLS_MIXING
+#  if defined LMD_MIXING || defined TKE_MIXING
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idVvis))) THEN
             got_var(idVvis)=.TRUE.
             AVG(ng)%Vid(idVvis)=var_id(i)
@@ -4187,7 +4180,7 @@
           exit_flag=3
           RETURN
         END IF
-#  if defined LMD_MIXING || defined MY25_MIXING || defined GLS_MIXING
+#  if defined LMD_MIXING || defined TKE_MIXING
         IF (.not.got_var(idVvis).and.Aout(idVvis,ng)) THEN
           IF (Master) WRITE (stdout,60) TRIM(Vname(1,idVvis)),          &
      &                                  TRIM(ncname)

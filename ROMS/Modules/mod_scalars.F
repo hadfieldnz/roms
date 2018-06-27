@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -107,8 +107,8 @@
 
         real(r8) :: seconds            ! frational seconds of the minute
         real(r8) :: base               ! reference date (YYYYMMDD.dd)
-        real(r8) :: Dnumber            ! date number, fractional days
-        real(r8) :: Snumber            ! date number, fractional seconds
+        real(r8) :: DateNumber(2)      ! date number, [1]: days
+                                       !              [2]: seconds
 
         character (len=22) :: string   ! YYYY-MM-DD hh:mm:ss.ss
         character (len=25) :: calendar ! date calendar
@@ -510,7 +510,8 @@
 !    exit_flag = 6   Partition error
 !    exit_flag = 7   Illegal input parameter
 !    exit_flag = 8   Fatal algorithm result
-!    exit_flag = 9   Frazil ice error
+!    exit_flag = 9   coupling error
+!    exit_flag = 10  Frazil ice error
 !
         integer :: exit_flag = 0
         integer :: blowup = 0
@@ -547,6 +548,10 @@
 !
         integer, allocatable :: levsfrc(:)
         integer, allocatable :: levbfrc(:)
+# if defined RR_MIXING || defined JK_MIXING
+        integer, allocatable :: levsmix(:)
+        integer, allocatable :: levbmix(:)
+# endif
 !
 !  Vertical coordinates transform.  Currently, there are two vertical
 !  transformation equations (see set_scoord.F for details):
@@ -1706,7 +1711,7 @@
         real(r8), allocatable :: sz_alpha(:)
         real(r8), allocatable :: crgban_cw(:)
 
-#if defined MY25_MIXING || defined GLS_MIXING
+#if defined TKE_MIXING
 !
 !-----------------------------------------------------------------------
 !  Mellor-Yamada (1982) Level 2.5 vertical mixing variables.
@@ -1736,6 +1741,7 @@
 !    my_lmax       Upper bound on the turbulent length scale.
 !    my_qmin       Lower bound on turbulent energy "tke" and "gls".
 !
+# if defined TKE_MIXING && !defined NN_MIXING && !defined LR_MIXING
         real(r8), parameter :: my_A1 = 0.92_r8
         real(r8), parameter :: my_A2 = 0.74_r8
         real(r8), parameter :: my_B1 = 16.6_r8
@@ -1743,6 +1749,25 @@
         real(r8), parameter :: my_C1 = 0.08_r8
         real(r8), parameter :: my_C2 = 0.7_r8
         real(r8), parameter :: my_C3 = 0.2_r8
+# elif defined  NN_MIXING 
+        real(r8), parameter :: my_A1 = 1.18_r8
+        real(r8), parameter :: my_A2 = 0.665_r8
+        real(r8), parameter :: my_B1 = 24.0_r8
+        real(r8), parameter :: my_B2 = 15.0_r8
+        real(r8), parameter :: my_C1 = 0.137_r8
+        real(r8), parameter :: my_C2 = 0.75_r8
+        real(r8), parameter :: my_C3 = 0.352_r8
+        real(r8), parameter :: my_C5 = 0.2_r8
+# elif defined LR_MIXING
+        real(r8), parameter :: my_A1 = 1.18_r8
+        real(r8), parameter :: my_A2 = 0.665_r8
+        real(r8), parameter :: my_B1 = 24.0_r8
+        real(r8), parameter :: my_B2 = 15.0_r8
+        real(r8), parameter :: my_C1 = 0.137_r8
+        real(r8), parameter :: my_C2 = 0.75_r8
+        real(r8), parameter :: my_C3 = 0.352_r8
+        real(r8), parameter :: my_C5 = 0.2_r8
+# endif
         real(r8), parameter :: my_E1 = 1.8_r8
         real(r8), parameter :: my_E2 = 1.33_r8
         real(r8), parameter :: my_Gh0 = 0.0233_r8
@@ -1857,10 +1882,10 @@
       DO ng=1,Ngrids
 
 #ifdef SOLVE3D
-        allocate ( SCALARS(ng) % Fstate(7+2*MT) )
+        allocate ( SCALARS(ng) % Fstate(8+2*MT) )
         SCALARS(ng) % Fstate(1:7+2*MT) = .FALSE.
 
-        allocate ( SCALARS(ng) % Lstate(5+MT) )
+        allocate ( SCALARS(ng) % Lstate(8+2*MT) )
         SCALARS(ng) % Lstate(1:5+MT) = .FALSE.
 #else
         allocate ( SCALARS(ng) % Fstate(5) )
@@ -2021,6 +2046,10 @@
 
       allocate ( levsfrc(Ngrids) )
       allocate ( levbfrc(Ngrids) )
+# if defined RR_MIXING || defined JK_MIXING
+      allocate ( levsmix(Ngrids) )
+      allocate ( levbmix(Ngrids) )
+# endif
 
       allocate ( Vtransform(Ngrids) )
       allocate ( Vstretching(Ngrids) )
@@ -2816,7 +2845,7 @@
       sg_mp=CMPLX(SQRT(1.0_r8/(2.0_r8*sg_z1p)),                         &
      &            SQRT(1.0_r8/(2.0_r8*sg_z1p)))
 #endif
-#if defined GLS_MIXING || defined MY25_MIXING
+#if defined TKE_MIXING
 # if defined CANUTO_A || defined CANUTO_B
 !
 ! Compute parameters for Canuto et al. (2001) stability functions.

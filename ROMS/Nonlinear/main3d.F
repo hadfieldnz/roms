@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -92,6 +92,10 @@
 #  ifndef ONE_WAY
       USE nesting_mod,          ONLY : do_twoway
 #  endif
+# endif
+# ifdef NN_MIXING
+      USE nn_corstep_mod,       ONLY : nn_corstep
+      USE nn_prestep_mod,       ONLY : nn_prestep
 # endif
 # if defined ADJUST_BOUNDARY
       USE obc_adjust_mod,       ONLY : obc_adjust, load_obc
@@ -183,7 +187,7 @@
 !
         nl=0
 #ifdef NESTING
-        TwoWayCounter(1:Ngrids)=0
+        TwoWayInterval(1:Ngrids)=0.0_r8
 #endif
 !
         NEST_LAYER : DO WHILE (DoNestLayer)
@@ -192,8 +196,8 @@
 !  based on the specified time interval (seconds), RunInterval. Non
 !  nesting applications have NestLayers=1. Notice that RunInterval is
 !  set in the calling driver. Its value may span the full period of the
-!  simulation, or a multi-model coupling interval, or just a single
-!  step.
+!  simulation, a multi-model coupling interval (RunInterval > ifac*dt),
+!  or just a single step (RunInterval=0).
 !
           CALL ntimesteps (iNLM, RunInterval, nl, Nsteps, Rsteps)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
@@ -215,11 +219,7 @@
               time(ng)=time(ng)+dt(ng)
               tdays(ng)=time(ng)*sec2day
               CALL time_string (time(ng), time_code(ng))
-# ifdef REGCM_COUPLING
-              IF (MOD(step_counter(ng),Rsteps).eq.0) Time_Step=.FALSE.
-# else
               IF (step_counter(ng).eq.Rsteps) Time_Step=.FALSE.
-# endif
             END DO
 !
 !-----------------------------------------------------------------------
@@ -637,6 +637,8 @@
                 CALL my25_prestep (ng, tile)
 # elif defined GLS_MIXING
                 CALL gls_prestep (ng, tile)
+# elif defined NN_MIXING
+                CALL nn_prestep (ng, tile)
 # endif
               END DO
 !$OMP BARRIER
@@ -859,6 +861,8 @@
                 CALL my25_corstep (ng, tile)
 # elif defined GLS_MIXING
                 CALL gls_corstep (ng, tile)
+# elif defined NN_MIXING
+                CALL nn_corstep (ng, tile)
 # endif
 # ifdef BIOLOGY
                 CALL biology (ng, tile)
@@ -917,7 +921,7 @@
             DO il=NestLayers,1,-1
               DO ig=1,GridsInLayer(il)
                 ng=GridNumber(ig,il)
-                IF (do_twoway(nl,il,ng,istep)) THEN
+                IF (do_twoway(iNLM, nl, il, ng, istep)) THEN
                   CALL nesting (ng, iNLM, n2way)
                 END IF
               END DO

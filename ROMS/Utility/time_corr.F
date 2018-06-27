@@ -6,7 +6,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group       Andrew M. Moore   !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group       Andrew M. Moore   !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -331,8 +331,8 @@
 !  Write out time variable.
 !
         IF (find_string(var_name, n_var, Vname(1,idtime), INPvid)) THEN
-          CALL netcdf_get_fvar (ng, model, INPncname, Vname(1,idtime),  &
-     &                          inp_time,                               &
+          CALL netcdf_get_time (ng, model, INPncname, Vname(1,idtime),  &
+     &                          Rclock%DateNumber, inp_time,            &
      &                          ncid = INPncid,                         &
      &                          start = (/Irec/), total = (/1/))
           IF (FoundError(exit_flag, NoError, __LINE__,                  &

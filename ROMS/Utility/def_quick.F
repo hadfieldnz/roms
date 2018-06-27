@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -1080,7 +1080,7 @@
      &                   __FILE__)) RETURN
         END IF
 # endif
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
 !
 !  Define turbulent kinetic energy.
 !
@@ -2117,7 +2117,7 @@
           status=def_var(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idVbcs),   &
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
-     &   cccc            __FILE__)) RETURN
+     &                   __FILE__)) RETURN
         END IF
 !
 !  Define wind-induced, bed wave orbital U-velocity.
@@ -2959,7 +2959,7 @@
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idSdif))) THEN
             got_var(idSdif)=.TRUE.
             QCK(ng)%Vid(idSdif)=var_id(i)
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idMtke))) THEN
             got_var(idMtke)=.TRUE.
             QCK(ng)%Vid(idMtke)=var_id(i)
@@ -3537,7 +3537,7 @@
           RETURN
         END IF
 # endif
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
         IF (.not.got_var(idMtke).and.Qout(idMtke,ng)) THEN
           IF (Master) WRITE (stdout,70) TRIM(Vname(1,idMtke)),          &
      &                                  TRIM(ncname)

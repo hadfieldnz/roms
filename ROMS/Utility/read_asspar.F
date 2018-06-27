@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -57,7 +57,7 @@
 #   ifdef SOLVE3D
       logical, dimension(4,MT,Ngrids) :: Lbry_trc
       logical, dimension(MT,4) :: Lboundary
-      real(r8), dimension(MT,4,Ngrids) :: Rboundary
+      real(r8), dimension(4,MT,Ngrids) :: Rboundary
 #   endif
 #  endif
       real(r8), dimension(MT,Ngrids) :: Rtracer
@@ -423,9 +423,9 @@
             CASE ('HdecayB(isTvar)')
               Npts=load_r(Nval, Rval, 4*MT*Ngrids, Rboundary)
               DO ng=1,Ngrids
-                DO ib=1,4
-                  DO itrc=1,NT(ng)
-                    HdecayB(isTvar(itrc),ib,ng)=Rboundary(itrc,ib,ng)
+                DO itrc=1,NT(ng)
+                  DO ib=1,4
+                    HdecayB(isTvar(itrc),ib,ng)=Rboundary(ib,itrc,ng)
                   END DO
                 END DO
               END DO
@@ -436,9 +436,9 @@
             CASE ('VdecayB(isTvar)')
               Npts=load_r(Nval, Rval, 4*MT*Ngrids, Rboundary)
               DO ng=1,Ngrids
-                DO ib=1,4
-                  DO itrc=1,NT(ng)
-                    VdecayB(isTvar(itrc),ib,ng)=Rboundary(itrc,ib,ng)
+                DO itrc=1,NT(ng)
+                  DO ib=1,4
+                    VdecayB(isTvar(itrc),ib,ng)=Rboundary(ib,itrc,ng)
                   END DO
                 END DO
               END DO
@@ -1274,27 +1274,31 @@
           WRITE (out,160) '      Input observations File:  ',           &
      &                    TRIM(fname)
 #   endif
+#   if !defined CORRELATION
           WRITE (out,160) '    Input/Output Lanczos File:  ',           &
      &                    TRIM(LCZ(ng)%name)
-#   ifndef IS4DVAR_SENSITIVITY
+#    ifndef IS4DVAR_SENSITIVITY
           WRITE (out,160) '    Input/Output Hessian File:  ',           &
      &                    TRIM(HSS(ng)%name)
-#   endif
-#   ifdef EVOLVED_LCZ
+#    endif
+#    ifdef EVOLVED_LCZ
           WRITE (out,160) '  Output evolved Lanczos File:  ',           &
      &                    TRIM(LZE(ng)%name)
+#    endif
 #   endif
 #  endif
-#  ifdef VERIFICATION
+#  if !defined CORRELATION
+#   ifdef VERIFICATION
           fname=OBS(ng)%name
           IF (.not.find_file(ng, fname, 'OBSname')) GO TO 30
           WRITE (out,160) '      Input observations File:  ',           &
      &                    TRIM(fname)
           WRITE (out,160) '     Output verification File:  ',           &
      &                    TRIM(DAV(ng)%name)
-#  else
+#   else
           WRITE (out,160) '            Output 4DVAR File:  ',           &
      &                    TRIM(DAV(ng)%name)
+#   endif
 #  endif
 #  if defined WEAK_CONSTRAINT   && \
      (defined POSTERIOR_ERROR_F || defined POSTERIOR_ERROR_I)

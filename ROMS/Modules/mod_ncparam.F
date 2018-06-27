@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -378,6 +378,7 @@
         integer  :: idW3yy        ! 3D radiation stress, Syy-component
         integer  :: idW3zx        ! 3D radiation stress, Szx-component
         integer  :: idW3zy        ! 3D radiation stress, Szy-component
+        integer  :: idWads        ! 3D W-velocity adjoint sensitivity
         integer  :: idWamp        ! wind-induced wave amplitude
         integer  :: idWbrk        ! wind-induced wave breaking
         integer  :: idWdis        ! wind-induced wave dissipation
@@ -536,6 +537,7 @@
         integer  :: isVbar = 3                ! 2D V-velocity
         integer  :: isUvel = 4                ! 3D U-velocity
         integer  :: isVvel = 5                ! 3D V-velocity
+        integer  :: isWvel                    ! 3D W-velocity
         integer  :: isRadial = 0              ! HF radial-velocity
         integer  :: isUstr                    ! surface u-stress
         integer  :: isVstr                    ! surface v-stress
@@ -582,6 +584,10 @@
 !  Input forcing NetCDF files IDs.
 !
         integer, allocatable :: ncFRCid(:,:)
+!
+!  Input river NetCDF files IDs.
+!
+        integer, allocatable :: ncSSFid(:,:)
 !
 !  Flags to create output files.
 !
@@ -743,6 +749,7 @@
       allocate ( ncBRYid(NV,Ngrids) )
       allocate ( ncCLMid(NV,Ngrids) )
       allocate ( ncFRCid(NV,Ngrids) )
+      allocate ( ncSSFid(NV,Ngrids) )
 
       allocate ( idefADJ(Ngrids) )
       allocate ( idefAVG(Ngrids) )
@@ -907,7 +914,7 @@
       END DO
 #endif
 #if defined ICE_MODEL || defined CICE_MODEL
-# if defined SOLVE3D && (defined GLS_MIXING || defined MY25_MIXING)
+# if defined SOLVE3D && defined TKE_MIXING
       ic=ic+1
 # endif
       isUice=ic+1
@@ -923,6 +930,7 @@
       isSig22=ic+11
       ic=ic+11
 #endif
+      isWvel=ic+1
 !
 !  Set generic lateral boundary indices for LBC structure.  Use the same
 !  values of the state variables at the same C-grid location.  Generic
@@ -938,7 +946,7 @@
       isBu3d=isUvel                           ! 3D U-variables
       isBv3d=isVvel                           ! 3D V-variables
       isBw3d=isTvar(1)                        ! 3D W-variables
-#if defined SOLVE3D && (defined GLS_MIXING || defined MY25_MIXING)
+#if defined SOLVE3D && defined TKE_MIXING
       isMtke=isTvar(MT)+1                     ! turbulent variables
 #endif
 !
@@ -986,6 +994,7 @@
           ncBRYid(i,ng)=-1
           ncCLMid(i,ng)=-1
           ncFRCid(i,ng)=-1
+          ncSSFid(i,ng)=-1
         END DO
       END DO
 !
@@ -1544,6 +1553,8 @@
               idTads(itemp)=varid
             CASE ('idTads(isalt)')
               idTads(isalt)=varid
+            CASE ('idWads')
+              idWads=varid
 #endif
 #ifdef WEAK_CONSTRAINT
             CASE ('idZtlf')
@@ -2632,7 +2643,7 @@
                 END DO
             END SELECT
 #endif
-#if defined SOLVE3D && defined AVERAGES
+#if defined SOLVE3D && (defined AVERAGES || defined AD_AVERAGES)
 !
 !  Determine metadata for quadratic tracer averages.
 !
@@ -2899,7 +2910,7 @@
         idBvar(isTvar(i))=idTvar(i)
         ic=ic+1
       END DO
-# if defined GLS_MIXING || defined MY25_MIXING
+# if defined TKE_MIXING
       ic=ic+1
       idBvar(ic)=idMtke
 # endif
