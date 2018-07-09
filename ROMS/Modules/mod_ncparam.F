@@ -627,14 +627,6 @@
 
         character (len=256), allocatable :: Cinfo(:,:)
 !
-!  Source code root directory, cpp header file and directory, and
-!  analytical expression directory.
-!
-        character (len=256) :: Rdir
-        character (len=256) :: Hdir
-        character (len=256) :: Hfile
-        character (len=256) :: Adir
-!
 !  Analyical header file logical and names.
 !
         logical :: Lanafile
@@ -650,10 +642,12 @@
         character (len=256), dimension(4) :: BIONAME
 #endif
 !
-!  SVN revision and repository root URL.
+!  Git revision and repository root URL
 !
-        character (len=40 ) :: svn_rev
-        character (len=256) :: svn_url
+        character (len=256) :: git_url = ''
+        character (len=80 ) :: git_rev = ''
+        integer             :: git_status = 0
+
 !
       CONTAINS
 !
@@ -998,20 +992,16 @@
         END DO
       END DO
 !
-!  Set source code root directory, cpp header file and directory, and
-!  analytical expression directory.
+!  Set Git repository info
 !
-#ifdef ROOT_DIR
-      Rdir=ROOT_DIR
+#ifdef GIT_URL
+          git_url=GIT_URL
 #endif
-#ifdef HEADER_DIR
-      Hdir=HEADER_DIR
+#ifdef GIT_REV
+          git_rev=GIT_REV
 #endif
-#ifdef ROMS_HEADER
-      Hfile=HEADER
-#endif
-#ifdef ANALYTICAL_DIR
-      Adir=ANALYTICAL_DIR
+#ifdef GIT_STATUS
+          git_status=GIT_STATUS
 #endif
 !
 !-----------------------------------------------------------------------
@@ -1035,23 +1025,14 @@
         READ (inp,*,ERR=30,END=40) Vinfo(1)
         Lvar=LEN_TRIM(Vinfo(1))
 !
-!  Extract SVN Repository Root URL.
+!  Ignore the Git repository URL, if any
 !
         IF ((Lvar.gt.0).and.(Vinfo(1)(1:1).eq.CHAR(36))) THEN
-          is=INDEX(Vinfo(1),'https')
-          ie=INDEX(Vinfo(1),'/ROMS')-1
-          IF (ie.gt.is) THEN
-            svn_url=Vinfo(1)(is:ie)
-          ELSE
-            svn_url='https:://myroms.org/svn/src'
-          END IF
-#ifdef SVN_REV
-          svn_rev=SVN_REV
-#endif
+          CONTINUE
 !
 !  Read in other variable information.
 !
-        ELSE IF ((Lvar.gt.0).and.(Vinfo(1)(1:1).ne.CHAR(33))) THEN
+        ELSEIF ((Lvar.gt.0).and.(Vinfo(1)(1:1).ne.CHAR(33))) THEN
           READ (inp,*,ERR=30) Vinfo(2)
           READ (inp,*,ERR=30) Vinfo(3)
           READ (inp,*,ERR=30) Vinfo(4)
