@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -61,7 +61,7 @@
 # endif
       integer :: i, j, lstr, nvatt, nvdim, status, varid, vindex
       integer :: OBSncid
-      integer :: Vsize(4), vardim(3)
+      integer :: vardim(3)
 # ifdef DISTRIBUTE
       integer :: ibuffer(2)
 # endif
@@ -1095,7 +1095,7 @@
             END IF
           END DO
           status=def_var(ng, iNLM, DAV(ng)%ncid, DAV(ng)%Vid(idOday),   &
-     &                   NF_FRST, 1, (/surveyDim/), Aval, Vinfo, ncname)
+     &                   NF_TOUT, 1, (/surveyDim/), Aval, Vinfo, ncname)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
         END IF
@@ -1211,7 +1211,7 @@
             END IF
           END DO
           status=def_var(ng, iNLM, DAV(ng)%ncid, DAV(ng)%Vid(idObsT),   &
-     &                   NF_FRST, 1, (/datumDim/), Aval, Vinfo, ncname)
+     &                   NF_TOUT, 1, (/datumDim/), Aval, Vinfo, ncname)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
         END IF

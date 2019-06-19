@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -44,7 +44,7 @@
       USE bulk_flux_mod,        ONLY : bulk_flux
 #  endif
 # endif
-# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK
+# if (defined ALBEDO_DIRDIFF || defined NCEP_FLUXES) && !defined BENCHMARK
       USE cawdir_eval_mod,      ONLY : cawdir_eval
 # endif
 # if defined ALBEDO && defined SHORTWAVE
@@ -155,7 +155,7 @@
 !
 !  Imported variable declarations.
 !
-      real(r8), intent(in) :: RunInterval
+      real(dp), intent(in) :: RunInterval
 !
 !  Local variable declarations.
 !
@@ -393,7 +393,7 @@
             DO ig=1,GridsInLayer(nl)
               ng=GridNumber(ig,nl)
               DO tile=first_tile(ng),last_tile(ng),+1
-# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK
+# if (defined ALBEDO_DIRDIFF || defined NCEP_FLUXES) && !defined BENCHMARK
                 CALL cawdir_eval(ng, tile)
 # endif
 # if defined ALBEDO && defined SHORTWAVE
@@ -609,18 +609,22 @@
 !-----------------------------------------------------------------------
 !  If refinement grid, interpolate (space, time) state variables
 !  contact points from donor grid extracted data.
+#  ifdef NESTING_DEBUG
 !
 !  Also, fill BRY_CONTACT(:,:)%Mflux to check for mass conservation
 !  between coarse and fine grids.  This is only done for diagnostic
 !  purposes. Also, debugging is possible with very verbose output
 !  to fort.300 is allowed by activating uppercase(nesting_debug).
+#  endif
 !-----------------------------------------------------------------------
 !
             DO ig=1,GridsInLayer(nl)
               ng=GridNumber(ig,nl)
               IF (RefinedGrid(ng).and.(RefineScale(ng).gt.0)) THEN
                 CALL nesting (ng, iNLM, nputD)
+#  ifdef NESTING_DEBUG
                 CALL nesting (ng, iNLM, nmflx)
+#  endif
               END IF
             END DO
 # endif

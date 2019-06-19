@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -44,7 +44,7 @@
       USE bulk_flux_mod,        ONLY : bulk_flux
 #  endif
 # endif
-# if defined ALBEDO_CLOUD || defined NCEP_FLUXES
+# if defined ALBEDO_DIRDIFF || defined NCEP_FLUXES
       USE cawdir_eval_mod,      ONLY : cawdir_eval
 # endif
 # if defined ALBEDO && defined SHORTWAVE
@@ -89,7 +89,7 @@
 # ifdef WAVES_OCEAN
       USE ocean_coupler_mod,    ONLY : ocn2wav_coupling
 # endif
-      USE omega_mod, ONLY : omega
+      USE omega_mod,            ONLY : omega
 # ifdef NEARSHORE_MELLOR
       USE radiation_stress_mod, ONLY : radiation_stress
 # endif
@@ -282,7 +282,7 @@
               DO tile=first_tile(ng),last_tile(ng),+1
                 CALL set_massflux (ng, tile, iNLM)
 # ifndef TS_FIXED
-                CALL rho_eos (ng, tile)
+                CALL rho_eos (ng, tile, iNLM)
 # endif
                 CALL diag (ng, tile)
               END DO
@@ -300,7 +300,7 @@
             DO ig=1,GridsInLayer(nl)
               ng=GridNumber(ig,nl)
               DO tile=first_tile(ng),last_tile(ng),+1
-# if (defined ALBEDO_CLOUD || defined NCEP_FLUXES) && !defined BENCHMARK
+# if (defined ALBEDO_DIRDIFF || defined NCEP_FLUXES) && !defined BENCHMARK
                 CALL cawdir_eval(ng, tile)
 # endif
 # if defined ALBEDO && defined SHORTWAVE

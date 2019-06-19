@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -51,8 +51,8 @@
 #ifdef ADJUST_BOUNDARY
       integer :: IorJdim
 #endif
-      integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3)
-      integer :: Vsize(4)
+      integer :: DimIDs(nDimID)
+      integer :: t2dgrd(3), u2dgrd(3), v2dgrd(3)
 
       integer :: def_dim
 
@@ -233,6 +233,11 @@
 # endif
 
 # ifdef ECOSIM
+        status=def_dim(ng, iNLM, QCK(ng)%ncid, ncname, 'Nbands',        &
+     &                 NBands, DimIDs(33))
+        IF (FoundError(exit_flag, NoError, __LINE__,                    &
+     &                 __FILE__)) RETURN
+
         status=def_dim(ng, iNLM, QCK(ng)%ncid, ncname, 'Nphy',          &
      &                 Nphy, DimIDs(25))
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
@@ -426,7 +431,7 @@
         Vinfo( 4)=TRIM(Rclock%calendar)
         Vinfo(14)=Vname(4,idtime)
         status=def_var(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idtime),     &
-     &                 NF_TYPE, 1, (/recdim/), Aval, Vinfo, ncname,     &
+     &                 NF_TOUT, 1, (/recdim/), Aval, Vinfo, ncname,     &
      &                 SetParAccess = .TRUE.)
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) RETURN
@@ -1335,27 +1340,6 @@
         END IF
 #  ifdef EMINUSP
 !
-!  Define E-P flux (as computed by bulk_flux.F).
-!
-        IF (Qout(idEmPf,ng)) THEN
-          Vinfo( 1)=Vname(1,idEmPf)
-          Vinfo( 2)=Vname(2,idEmPf)
-          Vinfo( 3)=Vname(3,idEmPf)
-          Vinfo(11)='upward flux, freshening (net precipitation)'
-          Vinfo(12)='downward flux, salting (net evaporation)'
-          Vinfo(14)=Vname(4,idEmPf)
-          Vinfo(16)=Vname(1,idtime)
-#   if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-#   endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idEmPf,ng),r8)
-          status=def_var(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idEmPf),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
-          IF (FoundError(exit_flag, NoError, __LINE__,                  &
-     &                   __FILE__)) RETURN
-        END IF
-!
 !  Define evaporation rate.
 !
         IF (Qout(idevap,ng)) THEN
@@ -1398,6 +1382,29 @@
      &                   __FILE__)) RETURN
         END IF
 #  endif
+# endif
+# if (defined BULK_FLUXES && defined EMINUSP) || defined ATM_COUPLING
+!
+!  Define E-P flux (as computed by bulk_flux.F).
+!
+        IF (Qout(idEmPf,ng)) THEN
+          Vinfo( 1)=Vname(1,idEmPf)
+          Vinfo( 2)=Vname(2,idEmPf)
+          Vinfo( 3)=Vname(3,idEmPf)
+          Vinfo(11)='upward flux, freshening (net precipitation)'
+          Vinfo(12)='downward flux, salting (net evaporation)'
+          Vinfo(14)=Vname(4,idEmPf)
+          Vinfo(16)=Vname(1,idtime)
+#  if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#  endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idEmPf,ng),r8)
+          status=def_var(ng, iNLM, QCK(ng)%ncid, QCK(ng)%Vid(idEmPf),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
 # endif
 # ifdef SHORTWAVE
 !
@@ -2958,9 +2965,6 @@
             got_var(idTair)=.TRUE.
             QCK(ng)%Vid(idTair)=var_id(i)
 #  ifdef EMINUSP
-          ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idEmPf))) THEN
-            got_var(idEmPf)=.TRUE.
-            QCK(ng)%Vid(idEmPf)=var_id(i)
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idevap))) THEN
             got_var(idevap)=.TRUE.
             QCK(ng)%Vid(idevap)=var_id(i)
@@ -2968,6 +2972,11 @@
             got_var(idrain)=.TRUE.
             QCK(ng)%Vid(idrain)=var_id(i)
 #  endif
+# endif
+# if (defined BULK_FLUXES && defined EMINUSP) || defined ATM_COUPLING
+          ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idEmPf))) THEN
+            got_var(idEmPf)=.TRUE.
+            QCK(ng)%Vid(idEmPf)=var_id(i)
 # endif
 # ifdef SHORTWAVE
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idSrad))) THEN
@@ -3701,12 +3710,6 @@
           RETURN
         END IF
 #  ifdef EMINUSP
-        IF (.not.got_var(idEmPf).and.Qout(idEmPf,ng)) THEN
-          IF (Master) WRITE (stdout,70) TRIM(Vname(1,idEmPf)),          &
-     &                                  TRIM(ncname)
-          exit_flag=3
-          RETURN
-        END IF
         IF (.not.got_var(idevap).and.Qout(idevap,ng)) THEN
           IF (Master) WRITE (stdout,70) TRIM(Vname(1,idevap)),          &
      &                                  TRIM(ncname)
@@ -3720,6 +3723,14 @@
           RETURN
         END IF
 #  endif
+# endif
+# if (defined BULK_FLUXES && defined EMINUSP) || defined ATM_COUPLING
+        IF (.not.got_var(idEmPf).and.Qout(idEmPf,ng)) THEN
+          IF (Master) WRITE (stdout,70) TRIM(Vname(1,idEmPf)),          &
+     &                                  TRIM(ncname)
+          exit_flag=3
+          RETURN
+        END IF
 # endif
 # ifdef SHORTWAVE
         IF (.not.got_var(idSrad).and.Qout(idSrad,ng)) THEN

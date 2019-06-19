@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -319,7 +319,7 @@
 # else
 
 #  if defined BULK_FLUXES || defined ECOSIM || defined CCSM_FLUXES2D || \
-    (defined SHORTWAVE && defined ANA_SRFLUX && defined ALBEDO_CLOUD)
+    (defined SHORTWAVE && defined ANA_SRFLUX && defined ALBEDO_DIRDIFF)
 !
 !-----------------------------------------------------------------------
 !  Set surface air temperature (degC).
@@ -340,7 +340,7 @@
 #  endif
 
 #  if defined BULK_FLUXES || defined ECOSIM || defined CCSM_FLUXES2D || \
-     (defined SHORTWAVE && defined ANA_SRFLUX && defined ALBEDO_CLOUD)
+     (defined SHORTWAVE && defined ANA_SRFLUX && defined ALBEDO_DIRDIFF)
 !
 !-----------------------------------------------------------------------
 !  Set surface air relative or specific humidity.

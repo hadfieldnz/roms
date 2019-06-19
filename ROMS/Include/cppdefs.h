@@ -3,7 +3,7 @@
 **
 ** svn $Id$
 ********************************************************** Hernan G. Arango ***
-** Copyright (c) 2002-2018 The ROMS/TOMS Group                               **
+** Copyright (c) 2002-2019 The ROMS/TOMS Group                               **
 **   Licensed under a MIT/X style license                                    **
 **   See License_ROMS.txt                                                    **
 *******************************************************************************
@@ -150,6 +150,7 @@
 ** WJ_GRADP            use if weighted density Jacobian (Song,1998)          **
 **                                                                           **
 ** ATM_PRESS           use to impose atmospheric pressure onto sea surface   **
+** PRESS_COMPENSATE    use to compensate for boundary without ATM pressure   **
 **                                                                           **
 ** OPTIONS for surface fluxes formulation using atmospheric boundary layer   **
 ** (Fairall et al, 1996):                                                    **
@@ -190,7 +191,7 @@
 **   or equal than 24 hours) can be modulated by the local diurnal cycle     **
 **   which is a function longitude, latitude and day-of-year.                **
 **                                                                           **
-** ALBEDO_CLOUD        use if albedo equation for shortwave radiation        **
+** ALBEDO_DIRDIFF      use if albedo equation for shortwave radiation        **
 ** ALBEDO_CSIM         use if albedo function from CSIM for ice              **
 ** ALBEDO_CURVE        use if albedo function of lat from Large and Yeager   **
 ** ALBEDO_FILE         use if albedo read from a file                        **
@@ -213,6 +214,7 @@
 ** DIAGNOSTICS_UV      use if writing out momentum diagnostics               **
 ** DIAGNOSTICS_TS      use if writing out tracer diagnostics                 **
 ** ICESHELF            use if including ice shelf cavities                   **
+** SINGLE_PRECISION    use if single precision arithmetic numerical kernel   **
 ** SPHERICAL           use if analytical spherical grid                      **
 ** STATIONS            use if writing out station data                       **
 ** STATIONS_CGRID      use if extracting data at native C-grid               **
@@ -538,6 +540,7 @@
 ** Bio-optical EcoSim model OPTIONS:                                         **
 **                                                                           **
 ** ECOSIM              use if bio-optical EcoSim model                       **
+** BIO_OPTICAL         use to compute underwater spectral light properties   **
 **                                                                           **
 ** Nemuro lower trophic level ecosystem model OPTIONS:                       **
 **                                                                           **
@@ -568,6 +571,7 @@
 ** OPTIONS for grid nesting:                                                 **
 **                                                                           **
 ** NESTING             use to activate grid nesting: composite/refinement    **
+** NESTING_DEBUG       use to check mass fluxes conservation in refinement   **
 ** NO_CORRECT_TRACER   use to avoid two-way correction of boundary tracer    **
 ** ONE_WAY             use if one-way nesting in refinement grids            **
 ** TIME_INTERP_FLUX    time interpolate coarse mass flux instead of persist  **
@@ -584,6 +588,7 @@
 ** CICE_COUPLING       use if coupling to CICE sea ice model                 **
 ** COAMPS_COUPLING     use if coupling to COAMPS atmospheric model           **
 ** DATA_COUPLING       use if coupling to DATA model                         **
+** EXCLUDE_SPONGE      use if excluding sponge point in export fields        **
 ** FRC_COUPLING        use if forcing from Atmopheric or Data model          **
 ** REFDIF_COUPLING     use if coupling to REFDIT wave model                  **
 ** REGCM_COUPLING      use if coupling to RegCM atmospheric model            **
@@ -591,6 +596,7 @@
 ** TIME_INTERP         use if importing snapshots for time interpolation     **
 ** WAM_COUPLING        use if coupling to WAM wave model                     **
 ** WRF_COUPLING        use if coupling to WRF atmospheric model              **
+** WRF_TIMEAVG         use if time-averaged fields over coupling interval    **
 **                                                                           **
 ** Nearshore and shallow water model OPTIONS:                                **
 **                                                                           **

@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group       Andrew M. Moore   !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group       Andrew M. Moore   !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -2657,7 +2657,8 @@
 !
 !  Imported variable declarations.
 !
-      real(r8), intent(in) :: tl_ZoL, ZoL, pi
+      real(r8), intent(in) :: tl_ZoL, ZoL
+      real(dp), intent(in) :: pi
 !
 !  Local variable declarations.
 !
@@ -2739,7 +2740,8 @@
 !
 !  Imported variable declarations.
 !
-      real(r8), intent(in) :: tl_ZoL, ZoL, pi
+      real(r8), intent(in) :: tl_ZoL, ZoL
+      real(dp), intent(in) :: pi
 !
 !  Local variable declarations.
 !

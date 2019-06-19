@@ -6,7 +6,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -73,9 +73,11 @@
       integer :: Nrec, Tid, Tindex, Trec, Vid, Vtype
       integer :: i, ic, j, job, lend, lstr, npts
 
-      real(r8) :: Aval, Clength, Fmax, Fmin, Tdelta
-      real(r8) :: Tmax, Tmin, Tmono, Tscale
-      real(r8) :: Tsec, Tval
+      real(r8) :: Aval, Fmax, Fmin
+
+      real(dp) :: Clength, Tdelta
+      real(dp) :: Tmax, Tmin, Tmono, Tscale
+      real(dp) :: Tsec, Tval
 
       real(r8), dimension((UBi-LBi+1)*UBj) :: A
 

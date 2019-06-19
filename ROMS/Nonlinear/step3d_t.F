@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -622,7 +622,7 @@
 !  Apply tracers point sources to the horizontal advection terms,
 !  if any.
 !
-          IF (LuvSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
+          IF (LuvSrc(ng)) THEN
             DO is=1,Nsrc(ng)
               Isrc=SOURCES(ng)%Isrc(is)
               Jsrc=SOURCES(ng)%Jsrc(is)
@@ -696,7 +696,7 @@
 !
 !  If refinement grids, extract tracer horizontal advection fluxes
 !  (Hz*u*T/n, Hz*v*T/m) at the grid contact boundary (physical
-!  domain period) to be used in two-way nesting.
+!  domain perimeter) to be used in two-way nesting.
 !
          IF (RefinedGrid(ng)) THEN
            DO cr=1,Ncontact
@@ -988,7 +988,7 @@
 !
 !  Apply mass point sources (volume vertical influx), if any.
 !
-          IF (LwSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
+          IF (LwSrc(ng)) THEN
             DO is=1,Nsrc(ng)
               Isrc=SOURCES(ng)%Isrc(is)
               Jsrc=SOURCES(ng)%Jsrc(is)
@@ -1493,7 +1493,9 @@
           END DO
         END DO
 # endif
-# define SALT_LIMIT
+# ifndef TS_MPDATA
+#  define SALT_LIMIT
+# endif
 # ifdef SALT_LIMIT
 !
 !  Apply clamp to salt

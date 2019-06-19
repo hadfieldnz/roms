@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !========================================================= Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                                !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                                !
 !    Licensed under a MIT/X style license                                     !
 !    See License_ROMS.txt                                                     !
 !==============================================================================
@@ -30,6 +30,8 @@
 !                       'v3dvar' => 3D V-variable.                            !
 !                       'w3dvar' => 3D W-variable.                            !
 !                       'b3dvar' => 3D BED-sediment.                          !
+!                       'l3dvar' => 3D spectral light variable.               !
+!                       'l4dvar' => 4D spectral light variable.               !
 !       scale         Scale to convert input data to model units.             !
 !                                                                             !
 !  Enclose Vinfo variables with single quotes so this file can be read with   !
@@ -170,7 +172,7 @@
   1.0d0
 
 'u_sur'                                            ! Output
-  'model surface u-momentum component'
+  'surface u-momentum component'
   'meter second-1'                                 ! [m/s]
   'u_sur, scalar, series'
   'ocean_time'
@@ -179,7 +181,7 @@
   1.0d0
 
 'v_sur'                                            ! Output
-  'model surface v-momentum component'
+  'surface v-momentum component'
   'meter second-1'                                 ! [m/s]
   'v_sur, scalar, series'
   'ocean_time'
@@ -188,7 +190,7 @@
   1.0d0
 
 'u_sur_eastward'                                   ! Output
-  'model surface eastward momentum component at RHO-points'
+  'surface eastward momentum component at RHO-points'
   'meter second-1'                                 ! [m/s]
   'u_sur_eastward, scalar, series'
   'ocean_time'
@@ -197,7 +199,7 @@
   1.0d0
 
 'v_sur_northward'                                  ! Output
-  'model surface northward momentum component at RHO-points'
+  'surface northward momentum component at RHO-points'
   'meter second-1'                                 ! [m/s]
   'v_sur_northward, scalar, series'
   'ocean_time'
@@ -260,7 +262,7 @@
   1.0d0
 
 'temp_sur'                                         ! Output
-  'model surface potential temperature'
+  'surface potential temperature'
   'Celsius'                                        ! [Celsius]
   'temp_sur, scalar, series'
   'ocean_time'
@@ -269,7 +271,7 @@
   1.0d0
 
 'salt_sur'                                         ! Output
-  'model surface salinity'
+  'surface salinity'
   'nondimensional'                                 ! [PSU]
   'salinity, scalar, series'
   'ocean_time'
@@ -3033,42 +3035,6 @@
   'idSSTc'
   'r2dvar'
   1.0d0
-
-!
-!------------------------------------------------------------------------------
-!  Nudging to climatology time scales. We can have a generic variable for all
-!  tracer nudging time scales or individual variables for each active and
-!  passive tracer. The metadata for the individual variables is set internally
-!  in "mod_ncparam".
-!------------------------------------------------------------------------------
-!
-
-'M2_NudgeCoef'                                     ! Input
-  '2D momentum inverse nudging coefficients'
-  'day-1'                                          ! [1/s]
-  'M2_NudgeCoef, scalar'
-  'nulvar'
-  'idM2nc'
-  'r2dvar'
-  1.157407d-5                                      ! 1/86400
-
-'M3_NudgeCoef'                                     ! Input
-  '3D momentum inverse nudging coefficients'
-  'day-1'                                          ! [1/s]
-  'M3_NudgeCoef, scalar'
-  'nulvar'
-  'idM3nc'
-  'r3dvar'
-  1.157407d-5                                      ! 1/86400
-
-'tracer_NudgeCoef'                                 ! Input
-  'generic tracer inverse nudging coefficients'
-  'day-1'                                          ! [1/s]
-  'tracer_NudgeCoef, scalar'
-  'nulvar'
-  'idgTnc'
-  'r3dvar'
-  1.157407d-5                                      ! 1/86400
 
 !
 !------------------------------------------------------------------------------
@@ -7206,6 +7172,118 @@
   'ocean_time'
   'idTvar(iPigs)'
   'r3dvar'
+  1.0d0
+
+!
+!  Diagnostic Ecosim variables.
+!
+
+'surface_irradiance'                               ! Output
+  'surface spectral light irradiance'
+  'micromole meter-2 s-1 nm-1'                     ! [micromole/m2/s/nm]
+  'surface_irradiance, scalar, series'
+  'ocean_time'
+  'iDbio3(idSpIr)'
+  'l3dvar'
+  1.0d0
+
+'downward_irradiance'                              ! Output
+  'spectral downward light irradiance'
+  'micromole meter-2 s-1 nm-1'                     ! [micromole/m2/s/nm]
+  'downward_irradiance, scalar, series'
+  'ocean_time'
+  'iDbio4(iddIrr)'
+  'l4dvar'
+  1.0d0
+
+'scalar_irradiance'                                ! Output
+  'scalar spectral light irradiance'
+  'micromole meter-2 s-1 nm-1'                     ! [micromole/m2/s/nm]
+  'scalar_irradiance, scalar, series'
+  'ocean_time'
+  'iDbio4(idsIrr)'
+  'l4dvar'
+  1.0d0
+
+'light_cosine'                                     ! Output
+  'underwater light spectral average cosine of zenith angle'
+  'nondimensional'                                 ! [nondimensional]
+  'light_cosine, scalar, series'
+  'ocean_time'
+  'iDbio4(idAcos)'
+  'l4dvar'
+  1.0d0
+
+'light_attenuation'                                ! Output
+  'diffuse light attenuation'
+  'meter-1'                                        ! [1/m]
+  'light_attenuation, scalar, series'
+  'ocean_time'
+  'iDbio4(idLatt)'
+  'l4dvar'
+  1.0d0
+
+'Phy_absorption'                                   ! Output
+  'phytoplankton optical absorption'
+  'meter-1'                                        ! [1/m]
+  'Phy_absorption, scalar, series'
+  'ocean_time'
+  'iDbio4(idaPHY)'
+  'l4dvar'
+  1.0d0
+
+'detrital_absorption'                              ! Output
+  'detrital optical absorption'
+  'meter-1'                                        ! [1/m]
+  'Det_absorption, scalar, series'
+  'ocean_time'
+  'iDbio4(idaDET)'
+  'l4dvar'
+  1.0d0
+
+'CDC_absorption'                                   ! Output
+  'color degradational matter optical absorption'
+  'meter-1'                                        ! [1/m]
+  'CDC_absorption, scalar, series'
+  'ocean_time'
+  'iDbio4(idaCDC)'
+  'l4dvar'
+  1.0d0
+
+'Phy_scattering'                                   ! Output
+  'phytoplankton optical scattering'
+  'meter-1'                                        ! [1/m]
+  'Phy_scattering, scalar, series'
+  'ocean_time'
+  'iDbio4(idsPHY)'
+  'l4dvar'
+  1.0d0
+
+'Phy_backscattering'                               ! Output
+  'phytoplankton optical backscattering'
+  'meter-1'                                        ! [1/m]
+  'Phy_backscattering, scalar, series'
+  'ocean_time'
+  'iDbio4(idbPHY)'
+  'l4dvar'
+  1.0d0
+
+'total_scattering'                                 ! Output
+  'total optical scattering'
+  'meter-1'                                        ! [1/m]
+  'total_scattering, scalar, series'
+  'ocean_time'
+  'iDbio4(idsTOT)'
+  'l4dvar'
+  1.0d0
+
+'total_backscattering'                             ! Output
+  'total optical backscattering'
+  'meter-1'                                        ! [1/m]
+  'total_backscattering, scalar, series'
+  'ocean_time'
+  'iDbio4(idbTOT)'
+  'l4dvar'
   1.0d0
 
 !

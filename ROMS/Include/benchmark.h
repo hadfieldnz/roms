@@ -1,14 +1,14 @@
 /*
 ** svn $Id$
 *******************************************************************************
-** Copyright (c) 2002-2018 The ROMS/TOMS Group                               **
+** Copyright (c) 2002-2019 The ROMS/TOMS Group                               **
 **   Licensed under a MIT/X style license                                    **
 **   See License_ROMS.txt                                                    **
 *******************************************************************************
 **
 ** Options for Benchmark Tests.  There are several grids configurations to run,
-** choose the appropriate standard input script: small ("ocean_bench1.in"),
-** medium ("ocean_bench2.in"), and large (ocean_bench3.in).
+** choose the appropriate standard input script: small ("roms_benchmark1.in"),
+** medium ("roms_benchmark2.in"), and large (roms_benchmark3.in).
 **
 ** Application flag:   BENCHMARK
 ** Input script:       benchmark1.in, benchmark2.in, benchmark3.in
@@ -56,7 +56,7 @@
 #define SPHERICAL
 #define ANA_GRID
 #define ANA_INITIAL
-#define ALBEDO_CLOUD
+#define ALBEDO_DIRDIFF
 #define ANA_SRFLUX
 #define ANA_SSFLUX
 #define ANA_BSFLUX

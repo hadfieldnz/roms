@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -78,12 +78,22 @@
 !                                                                      !
 !  Diagnostic fields parameters:                                       !
 !                                                                      !
+# if defined ECOSIM && defined BIO_OPTIC
+!  NDbands    Number of spectral irradiance bands.                     !
+# endif
 !  NDbio2d    Number of diagnostic 2D biology fields.                  !
 !  NDbio3d    Number of diagnostic 3D biology fields.                  !
+!  NDbio4d    Number of diagnostic 4D bio-optical fields.              !
 !  NDT        Number of diagnostic tracer fields.                      !
 !  NDM2d      Number of diagnostic 2D momentum fields.                 !
 !  NDM3d      Number of diagnostic 3D momentum fields.                 !
 !  NDrhs      Number of diagnostic 3D right-hand-side fields.          !
+!                                                                      !
+!  Estimated Dynamic and automatic memory parameters:                  !
+!                                                                      !
+!  BmemMax    Maximum automatic memory for distributed-memory buffers  !
+!               (bytes).                                               !
+!  Dmem       Dynamic memory requirements (array elements)             !
 !                                                                      !
 !=======================================================================
 !
@@ -113,6 +123,16 @@
 !
       integer, allocatable :: GridNumber(:,:)   ! [Ngrids,NestLayers]
 !
+!  Maximum automatic memory (bytes) required in distributed-memory
+!  buffers due to parallel exchanges.
+!
+      real(r8), allocatable :: BmemMax(:)       ! [Ngrids]
+!
+!  Estimated dynamic memory requirement (number of array elements) for
+!  a particular application per nested grid.
+!
+      real(r8), allocatable :: Dmem(:)          ! [Ngrids]
+!
 !-----------------------------------------------------------------------
 !  Define derived type structure, T_IO, used to store information about
 !  the input and output files.
@@ -130,8 +150,8 @@
         integer,  pointer :: Nrec(:)             ! NetCDF record size
         integer,  pointer :: Vid(:)              ! NetCDF variables IDs
         integer,  pointer :: Tid(:)              ! NetCDF tracers IDs
-        real(r8), pointer :: time_min(:)         ! starting time
-        real(r8), pointer :: time_max(:)         ! ending time
+        real(dp), pointer :: time_min(:)         ! starting time
+        real(dp), pointer :: time_max(:)         ! ending time
         character (len=50 ) :: label             ! structure label
         character (len=256) :: base              ! base file name
         character (len=256) :: name              ! current name
@@ -542,15 +562,23 @@
       integer :: NDM2d                  ! 2D momentum
       integer :: NDM3d                  ! 3D momentum
 !
-!  Number of diagnostic biology fields.  Currenly, only available for
-!  the Fennel model.
+!  Number of diagnostic biology/bio-optical fields.  Currently, only
+!  available for the Fennel and EcoSim models.
 !
       integer :: NDbio2d                ! 2D fields
       integer :: NDbio3d                ! 3D fields
+      integer :: NDbio4d                ! 4D fields
 !
 !  Number of diagnostic 3D right-hand-side fields.
 !
       integer :: NDrhs
+
+# if defined ECOSIM && defined BIO_OPTIC
+!
+!  Number of light spectral irradiance bands to process.
+!
+      integer :: NDbands
+# endif
 #endif
 
 #if defined FOUR_DVAR || defined IMPULSE
@@ -748,6 +776,16 @@
       END IF
       IF (.not.allocated(TileSize)) THEN
         allocate ( TileSize(Ngrids) )
+      END IF
+
+      IF (.not.allocated(BmemMax)) THEN
+        allocate ( BmemMax(Ngrids) )
+        BmemMax=0.0_r8
+      END IF
+
+      IF (.not.allocated(Dmem)) THEN
+        allocate ( Dmem(Ngrids) )
+        Dmem=0.0_r8
       END IF
 
 #ifdef PROPAGATOR

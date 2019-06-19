@@ -3,7 +3,7 @@
 **
 ** svn $Id$
 ********************************************************** Hernan G. Arango ***
-** Copyright (c) 2002-2018 The ROMS/TOMS Group     Alexander F. Shchepetkin  **
+** Copyright (c) 2002-2019 The ROMS/TOMS Group     Alexander F. Shchepetkin  **
 **   Licensed under a MIT/X style license                                    **
 **   See License_ROMS.txt                                                    **
 *******************************************************************************
@@ -83,11 +83,20 @@
 #define RHO_SURF
 
 /*
-** Turn ON/OFF double precision for real type variables and
-** associated intrinsic functions.
+** Turn ON/OFF double precision arithmetic in numerical kernel (default)
+** and floating-point type variables and associated intrinsic functions.
 */
 
-#define DOUBLE_PRECISION
+#ifdef SINGLE_PRECISION
+# ifdef OUT_DOUBLE
+#   undef OUT_DOUBLE
+# endif
+# ifndef RST_SINGLE
+#   define RST_SINGLE
+# endif
+#else
+# define DOUBLE_PRECISION
+#endif
 
 /*
 ** Turn ON masking when wetting and drying is activated.
@@ -196,6 +205,14 @@
 # define IOUT linew(ng)
 # define IUOUT liunw(ng)
 # define IEOUT lienw(ng)
+#endif
+
+/*
+** Single intrinsic Fortran functions.
+*/
+
+#ifdef SINGLE_PRECISION
+# define DSIGN SIGN
 #endif
 
 /*
@@ -806,7 +823,7 @@
 */
 
 #if (defined BULK_FLUXES && defined LONGWAVE) || defined ECOSIM || \
-    (defined ANA_SRFLUX  && defined ALBEDO_CLOUD)
+    (defined ANA_SRFLUX  && defined ALBEDO_DIRDIFF)
 # define CLOUDS
 #endif
 #if !defined CLOUDS && defined ANA_CLOUD
@@ -817,7 +834,7 @@
 ** Check for calling albedo function
 */
 
-#if defined ALBEDO_CLOUD   || defined ALBEDO_CSIM \
+#if defined ALBEDO_DIRDIFF || defined ALBEDO_CSIM \
   || defined ALBEDO_CURVE  || defined ALBEDO_FILE || defined ANA_ALBEDO
 # define ALBEDO
 #endif
@@ -832,8 +849,9 @@
 #   undef DIAGNOSTICS_TS
 # endif
 #endif
-#if defined DIAGNOSTICS_BIO &&       \
-   !(defined BIO_FENNEL || defined HYPOXIA_SRM || defined BIO_COBALT)
+#if defined DIAGNOSTICS_BIO && \
+  !(defined BIO_FENNEL      || defined HYPOXIA_SRM || defined ECOSIM || \
+    defined BIO_COBALT)
 #  undef DIAGNOSTICS_BIO
 #endif
 #if defined DIAGNOSTICS_BIO || defined DIAGNOSTICS_TS || \

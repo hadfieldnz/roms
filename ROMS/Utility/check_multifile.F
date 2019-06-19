@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -40,7 +40,7 @@
 
       integer :: Fcount, Nfiles, i, ifile, lstr
 
-      real(r8) :: Tfinal, Tmax, Tmin, Tscale
+      real(dp) :: Tfinal, Tmax, Tmin, Tscale
 
       character (len=1), parameter :: blank = ' '
       character (len= 22) :: F_code, I_code, Tmin_code, Tmax_code
@@ -203,6 +203,8 @@
           END IF
         END DO
       END IF
+
+#ifndef ANA_PSOURCE
 !
 !-----------------------------------------------------------------------
 !  Input Source/Sink data (river runoff).
@@ -304,7 +306,7 @@
           END IF
         END DO
       END IF
-
+#endif
 #ifdef FRC_FILE
 !
 !-----------------------------------------------------------------------
@@ -369,6 +371,10 @@
             END DO
           END IF
           exit_flag=4
+! Leaving this here because it helped one time when I told it 14 files
+! and gave it 13 file names.
+          IF (Master) print *, 'CHECK_MULTIFILE, Fcount', Fcount,       &
+     &                    TRIM(FRC(i,ng)%files(ifile))
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
         END IF
@@ -554,7 +560,7 @@
       USE mod_netcdf
       USE mod_scalars
 !
-      USE strings_mod, ONLY : FoundError
+      USE strings_mod, ONLY : FoundError, lowercase
 !
       implicit none
 !
@@ -566,7 +572,7 @@
 
       character (*), intent(in) :: ncname
 
-      real(r8), intent(out) :: Tmin, Tmax, Tscale
+      real(dp), intent(out) :: Tmin, Tmax, Tscale
 !
 !  Local variable declarations.
 !
@@ -613,7 +619,7 @@
 !  'time' in the variable name.
 !
       DO i=1,n_var
-        IF ((INDEX(TRIM(var_name(i)),'time').ne.0).and.                 &
+        IF ((INDEX(TRIM(lowercase(var_name(i))),'time').ne.0).and.      &
      &            (var_ndim(i).eq.1)) THEN
           TvarName=TRIM(var_name(i))
           foundit=.TRUE.

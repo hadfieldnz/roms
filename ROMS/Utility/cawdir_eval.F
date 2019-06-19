@@ -1,6 +1,6 @@
 #include "cppdefs.h"
       MODULE cawdir_eval_mod
-#if defined NCEP_FLUXES || defined ALBEDO_CLOUD
+#if defined NCEP_FLUXES || defined ALBEDO_DIRDIFF
 ! ----------------------------------------------------------------------
 !  compute 24 hrs mean albedo at the marine surface layer
 ! ----------------------------------------------------------------------
@@ -152,7 +152,7 @@
 ! --- compute 24 hrs mean albedo at the marine surface layer
 ! --- ------------------------------------------------------------------
 !
-      call caldate (tdays(ng), yd_r8=yday, dd_r8=day)
+      call caldate (tdays(ng), yd_dp=yday, dd_dp=day)
 !0 < day < 364
       day=mod(yday-1._r8,365._r8)
 !day-number-angle, in radians

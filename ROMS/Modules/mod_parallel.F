@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -137,6 +137,9 @@
       integer, parameter :: MP_FLOAT = MPI_REAL
 !!    integer, parameter :: MP_FLOAT = MPI_REAL4
 #  endif
+# endif
+# ifdef MPI
+      integer, parameter :: MP_DOUBLE = MPI_DOUBLE_PRECISION
 # endif
 #endif
 !

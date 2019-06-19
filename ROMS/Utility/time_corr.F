@@ -6,7 +6,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2018 The ROMS/TOMS Group       Andrew M. Moore   !
+!  Copyright (c) 2002-2019 The ROMS/TOMS Group       Andrew M. Moore   !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -59,9 +59,11 @@
       integer :: Vsize(4)
       integer :: j, k, itrc
 
-      real(r8) :: Fmin, Fmax, scale
-      real(r8) :: inp_time(1)
-      real(r8) :: timeI, timeR, fac
+      real(r8) :: Fmin, Fmax
+
+      real(dp) :: scale
+      real(dp) :: inp_time(1)
+      real(dp) :: timeI, timeR, fac
 
 # include "set_bounds.h"
 !
@@ -112,7 +114,7 @@
 !  Compute the time convolutions for the model error corrections.
 !
       Iinp=1
-      scale=1.0_r8
+      scale=1.0_dp
 !
 !  Read all free-surface records into the "f_zetaS" array.
 !
